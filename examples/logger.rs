@@ -29,6 +29,14 @@ fn main() -> ! {
     // take the peripherials
     let peripherals = target::Peripherals::take().expect("Failed to obtain Peripherals");
 
+    let mut timg0 = peripherals.TIMG0;
+    let mut timg1 = peripherals.TIMG1;
+
+    // (https://github.com/espressif/openocd-esp32/blob/97ba3a6bb9eaa898d91df923bbedddfeaaaf28c9/src/target/esp32.c#L431)
+    // openocd disables the watchdog timers on halt
+    // we will do it manually on startup
+    disable_timg_wdts(&mut timg0, &mut timg1);
+
     //General Purpose Input/Output pins
     let pins = peripherals.GPIO.split();
     let mut led = pins.gpio2.into_push_pull_output();
@@ -69,12 +77,30 @@ fn main() -> ! {
     uart0.change_baudrate(115200).unwrap(); //set signals per seconds
 
     // print startup message
-    writeln!(uart0, "\n\nReboot!\n",).unwrap();
+    //writeln!(uart0, "\n\nReboot!\n",).unwrap();
 
     loop {
-        writeln!(uart0, "In the loop\n").unwrap();
+        writeln!(uart0, "0000").unwrap();
         //red led blick
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }
+}
+
+const WDT_WKEY_VALUE: u32 = 0x50D83AA1;
+
+fn disable_timg_wdts(timg0: &mut target::TIMG0, timg1: &mut target::TIMG1) {
+    /* ESP32 ignores writes to any register if WDTWPROTECT doesn't contain the
+    * magic value of TIMG_WDT_WKEY_VALUE.  The datasheet recommends unsealing,
+    * making modifications, and sealing for every watchdog modification.
+    */
+    timg0
+        .wdtwprotect
+        .write(|w| unsafe { w.bits(WDT_WKEY_VALUE) });
+    timg1
+        .wdtwprotect
+        .write(|w| unsafe { w.bits(WDT_WKEY_VALUE) });
+
+    timg0.wdtconfig0.write(|w| unsafe { w.bits(0x0) });
+    timg1.wdtconfig0.write(|w| unsafe { w.bits(0x0) });
 }
