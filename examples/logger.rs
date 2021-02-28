@@ -74,8 +74,9 @@ fn main() -> ! {
         clock_control_config,
     ).unwrap();
 
-    //uart0.change_baudrate(115200).unwrap(); //set signals per seconds
-    uart0.change_baudrate(74880).unwrap();
+  //uart0.change_baudrate(115200).unwrap(); //set signals per seconds
+  //uart0.change_baudrate(74880 ).unwrap();
+    uart0.change_baudrate(9600  ).unwrap();
 
     // print startup message
     //writeln!(uart0, "\n\nReboot!\n",).unwrap();
