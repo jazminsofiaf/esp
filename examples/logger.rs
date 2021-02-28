@@ -79,13 +79,12 @@ fn main() -> ! {
     uart0.change_baudrate(9600  ).unwrap();
 
     // print startup message
-    //writeln!(uart0, "\n\nReboot!\n",).unwrap();
-
-    let b = [b'H', b'e', b'l', b'l', b'o'];
+    let b = [b'R', b'E', b'B', b'O', b'O',b'T'];
+    uart0.write_str(core::str::from_utf8(&b[..]).unwrap()).unwrap();
 
     loop {
-        writeln!(uart0, "0000").unwrap();
-        uart0.write_str(core::str::from_utf8(&b[..]).unwrap()).unwrap();
+        writeln!(uart0, "En el loop.....").unwrap();
+        
         //red led blick
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
