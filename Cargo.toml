@@ -1,7 +1,6 @@
 [package]
 name = "xtensa-quickstart"
 version = "0.1.0"
-authors = ["Scott Mabin <scott@mabez.dev>"]
 edition = "2018"
 
 [dependencies]
@@ -20,3 +19,8 @@ required-features = ["xtensa-lx-rt/lx6", "xtensa-lx/lx6", "esp32-hal"]
 [[example]]
 name = "esp8266"
 required-features = ["xtensa-lx-rt/lx106", "xtensa-lx/lx106", "esp8266-hal"]
+
+[[example]]
+name = "logger"
+required-features = ["xtensa-lx-rt/lx6", "xtensa-lx/lx6", "esp32-hal"]
+
