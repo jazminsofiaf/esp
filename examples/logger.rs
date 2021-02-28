@@ -79,8 +79,11 @@ fn main() -> ! {
     // print startup message
     //writeln!(uart0, "\n\nReboot!\n",).unwrap();
 
+    let b = [b'H', b'e', b'l', b'l', b'o'];
+
     loop {
         writeln!(uart0, "0000").unwrap();
+        uart0.write_str(core::str::from_utf8(&b[..]).unwrap()).unwrap();
         //red led blick
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
