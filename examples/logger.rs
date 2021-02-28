@@ -49,7 +49,7 @@ fn main() -> ! {
         peripherals.RTCCNTL, //Real Time Controls
         peripherals.APB_CTRL, // Advanced Peripheral Bus Control
         dport_clock_control,
-        esp32_hal::clock_control::XTAL_FREQUENCY_AUTO,
+        esp32_hal::clock_control::XTAL_FREQUENCY_26M,
     ).unwrap();
 
     // set desired clock frequencies
