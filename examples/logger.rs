@@ -21,7 +21,7 @@ use panic_halt as _;
 
 /// The default clock source is the onboard crystal
 /// In most cases 40mhz (but can be as low as 2mhz depending on the board)
-const CORE_HZ: u32 = 26_000_000;
+const CORE_HZ: u32 = 40_000_000;
 
 #[entry] // entry point
 fn main() -> ! {
@@ -49,7 +49,7 @@ fn main() -> ! {
         peripherals.RTCCNTL, //Real Time Controls
         peripherals.APB_CTRL, // Advanced Peripheral Bus Control
         dport_clock_control,
-        esp32_hal::clock_control::XTAL_FREQUENCY_26M,
+        esp32_hal::clock_control::XTAL_FREQUENCY_AUTO,
     ).unwrap();
 
     // set desired clock frequencies
@@ -74,7 +74,8 @@ fn main() -> ! {
         clock_control_config,
     ).unwrap();
 
-    uart0.change_baudrate(115200).unwrap(); //set signals per seconds
+    //uart0.change_baudrate(115200).unwrap(); //set signals per seconds
+    uart0.change_baudrate(74880).unwrap();
 
     // print startup message
     //writeln!(uart0, "\n\nReboot!\n",).unwrap();
