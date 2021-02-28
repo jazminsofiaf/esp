@@ -21,7 +21,7 @@ use panic_halt as _;
 
 /// The default clock source is the onboard crystal
 /// In most cases 40mhz (but can be as low as 2mhz depending on the board)
-const CORE_HZ: u32 = 40_000_000;
+const CORE_HZ: u32 = 26_000_000;
 
 #[entry] // entry point
 fn main() -> ! {
