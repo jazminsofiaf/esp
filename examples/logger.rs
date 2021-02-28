@@ -83,7 +83,7 @@ fn main() -> ! {
     uart0.write_str(core::str::from_utf8(&b[..]).unwrap()).unwrap();
 
     loop {
-        writeln!(uart0, "En el loop.....").unwrap();
+        writeln!(uart0, "Hellow world").unwrap();
         
         //red led blick
         led.set_high().unwrap();
