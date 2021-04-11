@@ -5,3 +5,6 @@ Cargo.lock
 .vscode/.cortex-debug.registers.state.json
 core
 svd/
+.idea
+.idea/*
+.idea/**

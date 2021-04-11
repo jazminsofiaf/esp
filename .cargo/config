@@ -1,5 +1,3 @@
-
-
 [target.xtensa-esp32-none-elf] # esp32
 runner = "xtensa-esp32-elf-gdb -q -x openocd.gdb"
 rustflags = [
