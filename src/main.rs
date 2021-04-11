@@ -1,8 +1,9 @@
 
-// to flash: cargo espflash --chip esp32 --example logger  --features="xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal" /dev/tty.usbserial-0001
+// to flash: cargo espflash --chip esp32 --features="xtensa-lx-rt/lx6,xtensa-lx/lx6" /dev/tty.usbserial-0001
 // to see:  screen /dev/tty.usbserial-0001 9600
 // to exit: ctr+a ctr+k
 
+// or inside a spressif project
 // to see: idf.py -p /dev/cu.usbserial-0001  monitor -B 9600 
 // to exit: ctr+]
 
@@ -11,17 +12,8 @@
 #![no_std] // no import standar library 
 #![no_main] // no main used
 
-
-//use core::fmt::Write;
-
-
-//import the esp32 hardware abstraction layer
 use esp32_hal::target; 
 use esp32_hal as hal;
-
-//import the serial port and its config
-//use esp32_hal::serial::{config::Config, Serial};
-//use esp32_hal::clock_control::{CPUSource::PLL, ClockControl};
 use esp32_hal::dport::Split;
 use hal::prelude::*;
 use xtensa_lx::timer::delay;
@@ -54,13 +46,13 @@ fn main() -> ! {
 
     let (_, dport_clock_control) = peripherals.DPORT.split();
 
-    let foo = logger::Logger::new(dport_clock_control, peripherals.RTCCNTL,peripherals.APB_CTRL, 
-                                    peripherals.UART0, pins.gpio1, pins.gpio3);
+    let mut serial_port_logger = logger::serial_port::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,
+                                               peripherals.UART0, pins.gpio1, pins.gpio3);
 
 
     loop {
         //writeln!(uart0, "Hellow world").unwrap();
-        foo.info("hello from logger");
+        serial_port_logger.info("Hello world from logger module");
 
         //red led blick
         led.set_high().unwrap();

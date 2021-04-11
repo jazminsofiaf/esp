@@ -1,28 +1,17 @@
+pub mod serial_port {
+    use esp32_hal::clock_control::{CPUSource::PLL, ClockControl};
+    use esp32_hal::target::{RTCCNTL,APB_CTRL, UART0};
+    use esp32_hal::gpio::{Gpio1,Gpio3};
+    use esp32_hal::serial::{config::Config, Serial};
+
+    use core::fmt::Write;
+    use esp32_hal as hal;
+    use hal::prelude::*;
+    use panic_halt as _;
 
 
-//use core::fmt::Write;
-
-
-//import the esp32 hardware abstraction layer
-//use esp32_hal::target; 
-use esp32_hal as hal;
-
-//import the serial port and its config
-use esp32_hal::serial::{config::Config, Serial};
-use esp32_hal::clock_control::{CPUSource::PLL, ClockControl};
-//use esp32_hal::dport::Split;
-use hal::prelude::*;
-//use xtensa_lx::timer::delay;
-use panic_halt as _;
-use esp32_hal::esp32::UART0;
-use esp32_hal::target::{RTCCNTL,APB_CTRL};
-
-
-pub mod logger {
     pub struct Logger<T> {
-        //mut uart0: Serial<_, _, _>
-        //uart0: Serial<T, T, T>
-        test_field: T,
+        serial: Serial<UART0, Gpio1<T>, Gpio3<T>>,
     }
 
     impl<T> Logger<T> {
@@ -30,8 +19,8 @@ pub mod logger {
                    real_time_control: RTCCNTL,
                    advanced_peripherial_bus_control: APB_CTRL,
                    uart: UART0,
-                   gpio1: Gpio1,
-                   gpio3: Gpio3,
+                   gpio1: Gpio1<T>,
+                   gpio3: Gpio3<T>,
         ) -> Logger<T> {
 
 
@@ -68,11 +57,17 @@ pub mod logger {
                 clock_control_config,
             ).unwrap();
 
+            uart0.change_baudrate(115200).unwrap(); //set signals per seconds
+            //uart0.change_baudrate(74880 ).unwrap();
+            //uart0.change_baudrate(9600  ).unwrap();
+
             Logger {
-                test_field: 3
+                serial: uart0
             }
         }
 
-        pub fn info(&self, msg: &str) {}
+        pub fn info(&mut self, msg: &'static str) {
+            writeln!(self.serial, "{}", msg).unwrap();
+        }
     }
 }
