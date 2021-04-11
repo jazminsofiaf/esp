@@ -1,6 +1,6 @@
 [package]
-name = "xtensa-quickstart"
-version = "0.1.0"
+name = "esp_jaz"
+version = "0.0.1"
 edition = "2018"
 
 [dependencies]
@@ -10,17 +10,21 @@ panic-halt = "0.2.0"
 
 # because we cant have optional dev-deps, these must go here
 esp32-hal = { version = "0.2.0", optional = true }
-esp8266-hal = { version = "0.4.0", optional = true }
+esp32 = { version = "0.10.0", optional = true }
+adxl343 = { path = "../adxl/adxl343", version = "0.8.0", optional = true }
+
 
 [[example]]
 name = "esp32"
 required-features = ["xtensa-lx-rt/lx6", "xtensa-lx/lx6", "esp32-hal"]
 
 [[example]]
-name = "esp8266"
-required-features = ["xtensa-lx-rt/lx106", "xtensa-lx/lx106", "esp8266-hal"]
-
-[[example]]
 name = "logger"
 required-features = ["xtensa-lx-rt/lx6", "xtensa-lx/lx6", "esp32-hal"]
+
+
+[[example]]
+name = "adxl"
+required-features = ["xtensa-lx-rt/lx6", "xtensa-lx/lx6", "esp32-hal", "esp32", "adxl343"]
+
 

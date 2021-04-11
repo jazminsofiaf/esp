@@ -1,7 +1,4 @@
 
-// to flash: cargo espflash --chip esp32 --example logger  --features="xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal" /dev/tty.usbserial-0001
-// to see:  screen /dev/tty.usbserial-0001 9600
-// to exit: ctr+a ctr+k
 #![no_std] // no import standar library 
 #![no_main] // no main used
 
@@ -20,6 +17,10 @@ use esp32_hal::dport::Split;
 use hal::prelude::*;
 use xtensa_lx::timer::delay;
 use panic_halt as _;
+
+
+//import acelerometer axld345 driver
+use adxl343;
 
 
 /// The default clock source is the onboard crystal
@@ -84,6 +85,9 @@ fn main() -> ! {
     // print startup message
     let b = [b'R', b'E', b'B', b'O', b'O',b'T'];
     uart0.write_str(core::str::from_utf8(&b[..]).unwrap()).unwrap();
+    
+
+    let acelerometro = adxl343::Adxl343::new(hal::I2c);
 
     loop {
         writeln!(uart0, "Hellow world").unwrap();
