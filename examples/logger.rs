@@ -1,4 +1,7 @@
 
+// to flash: cargo espflash --chip esp32 --example logger  --features="xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal" /dev/tty.usbserial-0001
+// to see:  screen /dev/tty.usbserial-0001 9600
+// to exit: ctr+a ctr+k
 #![no_std] // no import standar library 
 #![no_main] // no main used
 
@@ -17,6 +20,7 @@ use esp32_hal::dport::Split;
 use hal::prelude::*;
 use xtensa_lx::timer::delay;
 use panic_halt as _;
+use esp32_hal::hal::digital::v2::OutputPin;
 
 
 /// The default clock source is the onboard crystal
