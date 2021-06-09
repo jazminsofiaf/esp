@@ -15,6 +15,6 @@ rustflags = [
 
 
 [build]
-target = "xtensa-esp32-none-elf" # esp32
-# target = "xtensa-esp8266-none-elf" # esp8266
-# target = "xtensa-none-elf" # generic xtensa target
+target = "xtensa-esp32-none-elf" # esp32 #to navigate in the ide comment this target
+rustc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustc"
+rustdoc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustdoc"

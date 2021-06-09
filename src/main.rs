@@ -18,6 +18,7 @@ use esp32_hal::dport::Split;
 use hal::prelude::*;
 use xtensa_lx::timer::delay;
 use panic_halt as _;
+use esp32_hal::hal::digital::v2::OutputPin;
 
 
 mod logger;
