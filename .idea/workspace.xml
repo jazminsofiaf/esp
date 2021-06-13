@@ -14,9 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c516727a-7d9b-4e1e-93ee-c576973da99f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.cargo/config" beforeDir="false" afterPath="$PROJECT_DIR$/.cargo/config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/logger/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/logger.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logger.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logger.rs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -26,6 +26,13 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -50,7 +57,18 @@
     <property name="org.rust.disableDetachedFileInspection/Users/jazminferreiro/esp-rs/esp_jaz/src/main.rs" value="true" />
     <property name="settings.editor.selected.configurable" value="language.rust.cargo" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/loggers" />
+      <recent name="$PROJECT_DIR$/src/logger" />
+    </key>
+  </component>
   <component name="RunManager" selected="Cargo.Espflash">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Espflash" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="command" value="espflash --chip esp32 --features=&quot;xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal&quot; /dev/tty.usbserial-0001" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />

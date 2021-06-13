@@ -8,17 +8,17 @@ use esp32_hal::serial::config::Config;
 use core::fmt::Write;
 
 pub struct Logger<T> {
-        serial: Serial<UART0, Gpio1<T>, Gpio3<T>>,
+    serial: Serial<UART0, Gpio1<T>, Gpio3<T>>,
 }
 
 impl<T> Logger<T> {
-        pub fn new(dport_clock_control: esp32_hal::dport::ClockControl,
-                   real_time_control: RTCCNTL,
-                   advanced_peripherial_bus_control: APB_CTRL,
-                   uart: UART0,
-                   gpio1: Gpio1<T>,
-                   gpio3: Gpio3<T>,
-        ) -> Logger<T> {
+    pub fn new(dport_clock_control: esp32_hal::dport::ClockControl,
+               real_time_control: RTCCNTL,
+               advanced_peripherial_bus_control: APB_CTRL,
+               uart: UART0,
+               gpio1: Gpio1<T>,
+               gpio3: Gpio3<T>,
+    ) -> Logger<T> {
 
 
         // setup clocks & watchdog
