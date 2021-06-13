@@ -7,18 +7,20 @@ use esp32_hal::hal::watchdog::WatchdogEnable;
 use esp32_hal::serial::config::Config;
 use core::fmt::Write;
 
-pub struct Logger<T> {
-    serial: Serial<UART0, Gpio1<T>, Gpio3<T>>,
+//Logger<esp32_hal::gpio::Unknown>
+
+pub struct Logger {
+    serial: Serial<UART0, Gpio1<esp32_hal::gpio::Unknown>, Gpio3<esp32_hal::gpio::Unknown>>,
 }
 
-impl<T> Logger<T> {
+impl Logger {
     pub fn new(dport_clock_control: esp32_hal::dport::ClockControl,
                real_time_control: RTCCNTL,
                advanced_peripherial_bus_control: APB_CTRL,
                uart: UART0,
-               gpio1: Gpio1<T>,
-               gpio3: Gpio3<T>,
-    ) -> Logger<T> {
+               gpio1: Gpio1<esp32_hal::gpio::Unknown>,
+               gpio3: Gpio3<esp32_hal::gpio::Unknown>,
+    ) -> Logger {
 
 
         // setup clocks & watchdog
