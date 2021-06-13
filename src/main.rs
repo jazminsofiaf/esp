@@ -7,25 +7,43 @@
 // to see: idf.py -p /dev/cu.usbserial-0001  monitor -B 9600
 // to exit: ctr+]
 
+#![no_std]
+#![no_main]
+#![feature(alloc_error_handler)]
+#![feature(default_alloc_error_handler)]
 
 
-#![no_std] // no import standar library
-#![no_main] // no main used
+use esp32_hal::prelude::*;
+
 
 use esp32_hal::target;
-use esp32_hal as hal;
 use esp32_hal::dport::Split;
-use hal::prelude::*;
 use xtensa_lx::timer::delay;
-use panic_halt as _;
 use esp32_hal::hal::digital::v2::OutputPin;
 
 
+extern crate alloc;
+use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
+
+#[global_allocator]
+pub static GLOBAL_ALLOCATOR: Allocator = DEFAULT_ALLOCATOR;
+/*
+extern crate alloc;
+use alloc::sync::Arc;
+use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
+
+#[global_allocator]
+pub static GLOBAL_ALLOCATOR: Allocator = DEFAULT_ALLOCATOR;
+
+*/
 mod logger;
+mod mpu;
+
 
 /// The default clock source is the onboard crystal
 /// In most cases 40mhz (but can be as low as 2mhz depending on the board)
 const CORE_HZ: u32 = 40_000_000;
+
 
 #[entry] // entry point
 fn main() -> ! {
@@ -47,18 +65,39 @@ fn main() -> ! {
 
     let (_, dport_clock_control) = peripherals.DPORT.split();
 
-    let mut serial_port_logger: logger::Logger = logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,
-                                                    peripherals.UART0, pins.gpio1, pins.gpio3);
+   // let mut serial_port_logger: CriticalSectionSpinLockMutex<logger::Logger> = CriticalSectionSpinLockMutex::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,peripherals.UART0, pins.gpio1, pins.gpio3));
 
+    let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
+    //let mut mpu = mpu::Mpu::new(logger2);
     loop {
-        //writeln!(uart0, "Hellow world").unwrap();
-        serial_port_logger.info("Hello world from logger module");
+        serial_port_logger.clone().info("info from main loop");
+
+
+
+        /*
+        serial_port_logger.as_ref().lock(|logger| {
+            logger.info("Hello world from main loop")
+        });
+
+        {
+            let logger = &serial_port_logger;
+            logger.borrow().info("info from main loop");
+        }
+
+         */
+
+        //mpu.read();
 
         //red led blick
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }
+}
+
+#[panic_handler]
+fn my_panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {}
 }
 
 const WDT_WKEY_VALUE: u32 = 0x50D83AA1;

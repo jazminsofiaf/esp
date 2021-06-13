@@ -6,11 +6,11 @@ use esp32_hal::clock_control::CPUSource::PLL;
 use esp32_hal::hal::watchdog::WatchdogEnable;
 use esp32_hal::serial::config::Config;
 use core::fmt::Write;
-
-//Logger<esp32_hal::gpio::Unknown>
+use xtensa_lx::mutex::{CriticalSectionSpinLockMutex, Mutex};
+use core::borrow::Borrow;
 
 pub struct Logger {
-    serial: Serial<UART0, Gpio1<esp32_hal::gpio::Unknown>, Gpio3<esp32_hal::gpio::Unknown>>,
+    serial: CriticalSectionSpinLockMutex<Serial<UART0, Gpio1<esp32_hal::gpio::Unknown>, Gpio3<esp32_hal::gpio::Unknown>>>,
 }
 
 impl Logger {
@@ -61,12 +61,18 @@ impl Logger {
         //uart0.change_baudrate(9600  ).unwrap();
 
         Logger {
-            serial: uart0
+            serial: CriticalSectionSpinLockMutex::new(uart0)
         }
     }
 
-    pub fn info(&mut self, msg: &'static str) {
-        writeln!(self.serial, "{}", msg).unwrap();
+
+
+    pub fn info(&self, msg: &'static str) {
+        self.serial.borrow().lock(|logger| {
+            writeln!(logger, "{}", msg).unwrap();
+        });
     }
 }
+
+
 

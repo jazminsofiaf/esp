@@ -14,6 +14,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c516727a-7d9b-4e1e-93ee-c576973da99f" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/mpu/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.cargo/config" beforeDir="false" afterPath="$PROJECT_DIR$/.cargo/config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/logger/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logger/mod.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
@@ -61,7 +65,7 @@
       <recent name="$PROJECT_DIR$/src/logger" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Espflash">
+  <component name="RunManager" selected="Cargo.Expand esp_jaz [esp_jaz]">
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -71,6 +75,21 @@
       <option name="command" value="espflash --chip esp32 --features=&quot;xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal&quot; /dev/tty.usbserial-0001" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="NIGHTLY" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Expand esp_jaz [esp_jaz]" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="expand --bin esp_jaz --color=always --theme=GitHub --tests" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -98,7 +117,14 @@
     <list>
       <item itemvalue="Cargo.Espflash" />
       <item itemvalue="Shell Script.Build" />
+      <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
+        <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="externalLinterArguments" value="espflash --chip esp32 --features=&quot;xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal&quot; /dev/tty.usbserial-0001" />

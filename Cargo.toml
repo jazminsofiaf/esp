@@ -8,9 +8,13 @@ xtensa-lx-rt = "0.5.0"
 xtensa-lx = "0.3.0"
 panic-halt = "0.2.0"
 
+
 # because we cant have optional dev-deps, these must go here
-# esp32-hal = { path = "../esp32-hal", version = "0.2.0"}
-esp32-hal = { version = "0.2.0"}
+esp32-hal = { path = "../esp32-hal", version = "0.2.0", features = ["alloc"]}
+# esp32-hal = { version = "0.2.0",  features = ["alloc"]}
+
+[profile.dev]
+codegen-units = 1
 
 [[example]]
 name = "esp32"
