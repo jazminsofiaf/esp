@@ -20,6 +20,11 @@ use xtensa_lx::timer::delay;
 use panic_halt as _;
 use esp32_hal::hal::digital::v2::OutputPin;
 
+#[link(name="foo")]
+extern {
+    // this is rustified prototype of the function from our C library
+    fn hello();
+}
 
 mod logger;
 
@@ -52,6 +57,9 @@ fn main() -> ! {
 
 
     loop {
+        unsafe {
+            hello();
+        };
         //writeln!(uart0, "Hellow world").unwrap();
         serial_port_logger.info("Hello world from logger module");
 

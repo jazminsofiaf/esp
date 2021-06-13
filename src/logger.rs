@@ -10,6 +10,7 @@ pub mod serial_port {
     use panic_halt as _;
 
 
+
     pub struct Logger<T> {
         serial: Serial<UART0, Gpio1<T>, Gpio3<T>>,
     }
