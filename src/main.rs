@@ -64,32 +64,15 @@ fn main() -> ! {
     let mut led = pins.gpio2.into_push_pull_output();
 
     let (_, dport_clock_control) = peripherals.DPORT.split();
-
-   // let mut serial_port_logger: CriticalSectionSpinLockMutex<logger::Logger> = CriticalSectionSpinLockMutex::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,peripherals.UART0, pins.gpio1, pins.gpio3));
-
+    
     let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
-    //let mut mpu = mpu::Mpu::new(logger2);
+    let mpu = mpu::Mpu::new(serial_port_logger.clone());
     loop {
         serial_port_logger.clone().info("info from main loop");
 
+        mpu.read();
 
-
-        /*
-        serial_port_logger.as_ref().lock(|logger| {
-            logger.info("Hello world from main loop")
-        });
-
-        {
-            let logger = &serial_port_logger;
-            logger.borrow().info("info from main loop");
-        }
-
-         */
-
-        //mpu.read();
-
-        //red led blick
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }
