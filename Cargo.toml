@@ -10,7 +10,7 @@ panic-halt = "0.2.0"
 
 
 # because we cant have optional dev-deps, these must go here
-esp32-hal = { path = "../esp32-hal", version = "0.2.0", features = ["alloc"]}
+esp32-hal = { path = "esp32-hal", version = "0.2.0", features = ["alloc"]}
 # esp32-hal = { version = "0.2.0",  features = ["alloc"]}
 
 [profile.dev]

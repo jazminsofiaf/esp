@@ -14,9 +14,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c516727a-7d9b-4e1e-93ee-c576973da99f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mpu/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpu/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +41,7 @@
     <option name="directoryName" value="24tgbit7" />
   </component>
   <component name="ProjectId" id="1r05BgHNSk7mGmyRt4lnkwA79KW" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -62,7 +64,7 @@
       <recent name="$PROJECT_DIR$/src/logger" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Expand esp_jaz [esp_jaz]">
+  <component name="RunManager" selected="Cargo.build">
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -83,8 +85,8 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Expand esp_jaz [esp_jaz]" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="command" value="expand --bin esp_jaz --color=always --theme=GitHub --tests" />
+    <configuration name="build" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="xbuild" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="channel" value="DEFAULT" />
       <option name="requiredFeatures" value="true" />
@@ -113,12 +115,12 @@
     </configuration>
     <list>
       <item itemvalue="Cargo.Espflash" />
+      <item itemvalue="Cargo.build" />
       <item itemvalue="Shell Script.Build" />
-      <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
+        <item itemvalue="Cargo.build" />
         <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
       </list>
     </recent_temporary>

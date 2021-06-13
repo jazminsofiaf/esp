@@ -64,7 +64,7 @@ fn main() -> ! {
     let mut led = pins.gpio2.into_push_pull_output();
 
     let (_, dport_clock_control) = peripherals.DPORT.split();
-    
+
     let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
     let mpu = mpu::Mpu::new(serial_port_logger.clone());
