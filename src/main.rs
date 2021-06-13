@@ -47,7 +47,7 @@ fn main() -> ! {
 
     let (_, dport_clock_control) = peripherals.DPORT.split();
 
-    let mut serial_port_logger = logger::serial_port::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,
+    let mut serial_port_logger = logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL,
                                                peripherals.UART0, pins.gpio1, pins.gpio3);
 
 
