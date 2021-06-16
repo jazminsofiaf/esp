@@ -24,11 +24,7 @@ use esp32_hal::hal::digital::v2::OutputPin;
 #[macro_use]
 extern crate alloc;
 use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
-
-use alloc::borrow::ToOwned;
 use esp32_hal::delay::Delay;
-use core::fmt::Error;
-use crate::mpu::MpuError;
 
 
 #[global_allocator]

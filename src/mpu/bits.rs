@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Bit operations on registers
 //! Mostly taken from https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/I2Cdev/I2Cdev.cpp
 //! updated and tested
