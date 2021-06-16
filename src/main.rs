@@ -21,9 +21,10 @@ use esp32_hal::dport::Split;
 use xtensa_lx::timer::delay;
 use esp32_hal::hal::digital::v2::OutputPin;
 
-
 extern crate alloc;
 use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
+
+
 
 #[global_allocator]
 pub static GLOBAL_ALLOCATOR: Allocator = DEFAULT_ALLOCATOR;
@@ -59,12 +60,12 @@ fn main() -> ! {
 
     let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
-    let mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
+    let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
+    mpu.init();
+
     loop {
         serial_port_logger.clone().info("info from main loop");
-
-        mpu.read();
-
+        let temp = mpu.read_temperature();
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }
