@@ -182,20 +182,20 @@ impl Mpu{
         }
     }
 
-    pub fn init(&mut self, delay: &mut DelayMs<u8>) -> Result<(), MpuError>{
+    pub fn init(&mut self, delay: &mut DelayMs<u8>) -> Result<(), Error>{
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
         self.logger.info("init");
         self.wake(delay)?;
-        self.verify()?;
         self.set_accel_range(AccelRange::G2)?;
         self.set_gyro_range(GyroRange::D250)?;
         self.set_accel_hpf(ACCEL_HPF::_RESET)?;
-        Ok(())
+        return self.verify();
+
     }
 
     /// Wakes MPU6050 with all sensors enabled (default)
-    fn wake(&mut self, delay: &mut DelayMs<u8>) -> Result<(), MpuError> {
+    fn wake(&mut self, delay: &mut DelayMs<u8>) -> Result<(), Error> {
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
         self.write_byte(PWR_MGMT_1::ADDR, 0x01)?;
@@ -204,16 +204,17 @@ impl Mpu{
     }
 
     /// Verifies device to address 0x68 with WHOAMI.addr() Register
-    fn verify(&mut self) -> Result<(), MpuError> {
+    fn verify(&mut self) -> Result<(), Error> {
         let address = self.read_byte(WHOAMI)?;
         if address != SLAVE_ADDR {
-            return Err(MpuError::InvalidChipId(address));
+            self.logger.info("Mpu device not connected");
+            return Err(Error::Transmit);
         }
         Ok(())
     }
 
     /// set accel range, and update sensitivy accordingly
-    pub fn set_accel_range(&mut self, range: AccelRange) -> Result<(), MpuError> {
+    pub fn set_accel_range(&mut self, range: AccelRange) -> Result<(), Error> {
         self.write_bits(ACCEL_CONFIG::ADDR,
                         ACCEL_CONFIG::FS_SEL.bit,
                         ACCEL_CONFIG::FS_SEL.length,
@@ -224,7 +225,7 @@ impl Mpu{
     }
 
     /// Set gyro range, and update sensitivity accordingly
-    pub fn set_gyro_range(&mut self, range: GyroRange) -> Result<(), MpuError> {
+    pub fn set_gyro_range(&mut self, range: GyroRange) -> Result<(), Error> {
         self.write_bits(GYRO_CONFIG::ADDR,
                         GYRO_CONFIG::FS_SEL.bit,
                         GYRO_CONFIG::FS_SEL.length,
@@ -235,7 +236,7 @@ impl Mpu{
     }
 
     /// set accel high pass filter mode
-    pub fn set_accel_hpf(&mut self, mode: ACCEL_HPF) -> Result<(), MpuError> {
+    pub fn set_accel_hpf(&mut self, mode: ACCEL_HPF) -> Result<(), Error> {
         Ok(
             self.write_bits(ACCEL_CONFIG::ADDR,
                             ACCEL_CONFIG::ACCEL_HPF.bit,
@@ -245,7 +246,7 @@ impl Mpu{
     }
 
     /// Write bits data at reg from start_bit to start_bit+length
-    pub fn write_bits(&mut self, reg: u8, start_bit: u8, length: u8, data: u8) -> Result<(), MpuError> {
+    pub fn write_bits(&mut self, reg: u8, start_bit: u8, length: u8, data: u8) -> Result<(), Error> {
         let mut byte: [u8; 1] = [0; 1];
         self.read_bytes(reg, &mut byte)?;
         bits::set_bits(&mut byte[0], start_bit, length, data);
@@ -253,27 +254,25 @@ impl Mpu{
     }
 
     /// Reads series of bytes into buf from specified reg
-    pub fn read_bytes(&mut self, reg: u8, buf: &mut [u8]) -> Result<(), MpuError> {
+    pub fn read_bytes(&mut self, reg: u8, buf: &mut [u8]) -> Result<(), Error> {
         return self.i2c.borrow().lock( |bus| {
              bus.write_read(SLAVE_ADDR, &[reg], buf)
-                .map_err(MpuError::I2c)
         });
 
     }
 
     /// Writes byte to register
-    fn write_byte(&mut self, reg: u8, byte: u8) -> Result<(), MpuError>{
+    fn write_byte(&mut self, reg: u8, byte: u8) -> Result<(), Error>{
         return self.i2c.borrow().lock( |bus| {
-            bus.write(SLAVE_ADDR, &[reg, byte]).map_err(MpuError::I2c)
+            bus.write(SLAVE_ADDR, &[reg, byte])
         });
     }
 
     /// Reads series of bytes into buf from specified reg
-    fn read_byte(&mut self, reg: u8) -> Result<u8, MpuError> {
+    fn read_byte(&mut self, reg: u8) -> Result<u8, Error> {
         let mut byte: [u8; 1] = [0; 1];
         self.i2c.borrow().lock( |bus| {
             bus.write_read(SLAVE_ADDR, &[reg],  &mut byte)
-                .map_err(MpuError::I2c)
         });
         Ok(byte[0])
     }

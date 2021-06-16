@@ -27,6 +27,8 @@ use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
 
 use alloc::borrow::ToOwned;
 use esp32_hal::delay::Delay;
+use core::fmt::Error;
+use crate::mpu::MpuError;
 
 
 #[global_allocator]
@@ -65,7 +67,7 @@ fn main() -> ! {
 
     let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
     let mut delay_i2c = Delay::new();
-    mpu.init(&mut delay_i2c);
+    mpu.init(&mut delay_i2c).unwrap();
 
     loop {
         serial_port_logger.clone().info("info from main loop");
