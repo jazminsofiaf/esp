@@ -14,10 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c516727a-7d9b-4e1e-93ee-c576973da99f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mpu/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mpu/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,6 +55,7 @@
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
     <property name="org.rust.disableDetachedFileInspection/Users/jazminferreiro/esp-rs/esp_jaz/src/main.rs" value="true" />
+    <property name="org.rust.disableDetachedFileInspection/Users/jazminferreiro/esp-rs/esp_jaz/src/mpu/mod.rs" value="true" />
     <property name="settings.editor.selected.configurable" value="language.rust.cargo" />
   </component>
   <component name="RecentsManager">
@@ -65,11 +65,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Cargo.build">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Espflash" type="CargoCommandRunConfiguration" factoryName="Cargo Command" nameIsGenerated="true">
       <option name="command" value="espflash --chip esp32 --features=&quot;xtensa-lx-rt/lx6,xtensa-lx/lx6,esp32-hal&quot; /dev/tty.usbserial-0001" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -121,7 +116,6 @@
     <recent_temporary>
       <list>
         <item itemvalue="Cargo.build" />
-        <item itemvalue="Cargo.Expand esp_jaz [esp_jaz]" />
       </list>
     </recent_temporary>
   </component>

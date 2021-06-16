@@ -27,15 +27,7 @@ use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
 
 #[global_allocator]
 pub static GLOBAL_ALLOCATOR: Allocator = DEFAULT_ALLOCATOR;
-/*
-extern crate alloc;
-use alloc::sync::Arc;
-use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
 
-#[global_allocator]
-pub static GLOBAL_ALLOCATOR: Allocator = DEFAULT_ALLOCATOR;
-
-*/
 mod logger;
 mod mpu;
 
@@ -63,11 +55,11 @@ fn main() -> ! {
     let pins = peripherals.GPIO.split();
     let mut led = pins.gpio2.into_push_pull_output();
 
-    let (_, dport_clock_control) = peripherals.DPORT.split();
+    let (dport, dport_clock_control) = peripherals.DPORT.split();
 
     let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
-    let mpu = mpu::Mpu::new(serial_port_logger.clone());
+    let mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
     loop {
         serial_port_logger.clone().info("info from main loop");
 
