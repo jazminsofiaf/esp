@@ -21,9 +21,12 @@ use esp32_hal::dport::Split;
 use xtensa_lx::timer::delay;
 use esp32_hal::hal::digital::v2::OutputPin;
 
+#[macro_use]
 extern crate alloc;
 use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
 
+use alloc::borrow::ToOwned;
+use esp32_hal::delay::Delay;
 
 
 #[global_allocator]
@@ -61,11 +64,13 @@ fn main() -> ! {
     let serial_port_logger = alloc::sync::Arc::new(logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3));
 
     let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
-    mpu.init();
+    let mut delay_i2c = Delay::new();
+    mpu.init(&mut delay_i2c);
 
     loop {
         serial_port_logger.clone().info("info from main loop");
         let temp = mpu.read_temperature();
+        serial_port_logger.clone().info_float(temp);
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }
