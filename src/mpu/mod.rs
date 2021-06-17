@@ -1,7 +1,6 @@
 mod bits;
 mod device;
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,
-                         SLAVE_ADDR, WHOAMI, ACCEL_CONFIG, GYRO_CONFIG};
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET};
 use crate::logger::Logger;
 use alloc::sync::Arc;
 use esp32_hal::i2c::{self, Error};
@@ -47,10 +46,11 @@ impl Mpu{
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
         self.logger.info("init");
         self.wake(delay)?;
+        self.verify()?;
         self.set_accel_range(AccelRange::G2)?;
         self.set_gyro_range(GyroRange::D250)?;
         self.set_accel_hpf(ACCEL_HPF::_RESET)?;
-        return self.verify();
+        Ok(())
 
     }
 
@@ -58,7 +58,7 @@ impl Mpu{
     fn wake(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error> {
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
-        self.write_byte(PWR_MGMT_1::ADDR, 0x01)?;
+        self.write_byte(PWR_MGMT_1::ADDR, 0x01)?; //0x6B=0x00
         delay.delay_ms(100u8);
         Ok(())
     }
@@ -137,6 +137,14 @@ impl Mpu{
         Ok(byte[0])
     }
 
+    /// Converts 2 bytes number in 2 compliment
+    fn read_word_2c(&self, byte: &[u8]) -> i16 {
+        let high: i16 = byte[0] as i16;
+        let low: i16 = byte[1] as i16;
+        let word: i16 = (high << 8) | low;
+        return word;
+    }
+
 
 
 
@@ -144,8 +152,34 @@ impl Mpu{
         self.logger.info("info from mpu sensor")
     }
 
-    pub fn read_temperature(& self)-> f64{
+
+
+    /// Sensor Temp in degrees celcius
+    pub fn read_temperature(&mut self) -> Result<f32,Error>{
         self.logger.info("read temperature");
-        return 24.00;
+        let mut buf: [u8; 2] = [0; 2];
+        self.read_bytes(TEMP_OUT_H, &mut buf)?;
+        let raw_temp = self.read_word_2c(&buf[0..2]) as f32;
+        Ok((raw_temp / TEMP_SENSITIVITY) + TEMP_OFFSET)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_word_test() {
+        let b0:u8= 0b0000;
+        let b1:u8= 0b0001;
+        let byte = [b0,b0];
+        assert_eq!(read_word_2c(&byte), 0);
+        let byte = [b0,b1];
+        assert_eq!(read_word_2c(&byte), 1);
+        let byte = [b1,b0];
+        assert_eq!(read_word_2c(&byte), 256);
+        let byte = [b1,b1];
+        assert_eq!(read_word_2c(&byte), 257);
+
     }
 }

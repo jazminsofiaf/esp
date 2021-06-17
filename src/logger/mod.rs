@@ -73,7 +73,7 @@ impl Logger {
         });
     }
 
-    pub fn info_float(&self, var: f64) {
+    pub fn info_float(&self, var: f32) {
         self.serial.borrow().lock(|logger| {
             writeln!(logger, "temp:{:.2} ", var).unwrap();
         });

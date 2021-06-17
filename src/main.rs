@@ -67,7 +67,7 @@ fn main() -> ! {
 
     loop {
         serial_port_logger.clone().info("info from main loop");
-        let temp = mpu.read_temperature();
+        let temp = mpu.read_temperature().unwrap();
         serial_port_logger.clone().info_float(temp);
         led.set_high().unwrap();
         delay(CORE_HZ); // timer

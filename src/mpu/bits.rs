@@ -62,11 +62,12 @@ pub fn set_bits(byte: &mut u8, bit_start: u8, length: u8, mut data: u8) {
     *byte |= data;                      // combine data with existing byte
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    extern crate std;
-    use std::*;
+    //extern crate std;
+    //use std::*;
 
     use crate::device::*;
 

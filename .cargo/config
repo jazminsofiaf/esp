@@ -3,6 +3,8 @@ runner = "xtensa-esp32-elf-gdb -q -x openocd.gdb"
 rustflags = [
     "-C", "link-arg=-Wl,-Tlink.x",
     "-C", "link-arg=-nostartfiles",
+    "-C", "link-arg=--sysroot=/Users/jazminferreiro/esp-rs/xtensa-rust-quickstart/target/sysroot/lib/rustlib/xtensa-esp32-none-elf",
+
 ]
 
 
@@ -17,5 +19,9 @@ rustflags = [
 
 [build]
 target = "xtensa-esp32-none-elf" # esp32 #to navigate in the ide comment this target
-rustc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustc"
-rustdoc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustdoc"
+rustc = "rustc"
+#rustc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustc"
+#rustdoc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustdoc"
+
+[test]
+target = "xtensa-esp32-none-elf"
