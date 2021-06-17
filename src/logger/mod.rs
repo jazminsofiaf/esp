@@ -8,9 +8,25 @@ use esp32_hal::serial::config::Config;
 use core::fmt::Write;
 use xtensa_lx::mutex::{CriticalSectionSpinLockMutex, Mutex};
 use core::borrow::Borrow;
+use core::fmt;
+
+macro_rules! uprint {
+    ($serial:expr, $($arg:tt)*) => {
+        $serial.write_fmt(format_args!($($arg)*)).ok()
+    };
+}
+
+macro_rules! uprintln {
+    ($serial:expr, $fmt:expr) => {
+        uprint!($serial, concat!($fmt, "\n"))
+    };
+    ($serial:expr, $fmt:expr, $($arg:tt)*) => {
+        uprint!($serial, concat!($fmt, "\n"), $($arg)*)
+    };
+}
 
 pub struct Logger {
-    serial: CriticalSectionSpinLockMutex<Serial<UART0, Gpio1<esp32_hal::gpio::Unknown>, Gpio3<esp32_hal::gpio::Unknown>>>,
+    serial: Serial<UART0, Gpio1<esp32_hal::gpio::Unknown>, Gpio3<esp32_hal::gpio::Unknown>>,
 }
 
 impl Logger {
@@ -61,23 +77,29 @@ impl Logger {
         //uart0.change_baudrate(9600  ).unwrap();
 
         Logger {
-            serial: CriticalSectionSpinLockMutex::new(uart0)
+            serial: uart0
         }
     }
 
 
+    pub fn info(&mut self, msg: &'static str) {
+        uprintln!(self, "The answer is {}", 40 + 2);
+    }
 
+/*
     pub fn info(&self, msg: &'static str) {
         self.serial.borrow().lock(|logger| {
             writeln!(logger, "{}", msg).unwrap();
         });
     }
+ */
 
-    pub fn info_float(&self, var: f32) {
-        self.serial.borrow().lock(|logger| {
-            writeln!(logger, "temp:{:.2} ", var).unwrap();
-        });
+}
 
+impl fmt::Write for Logger {
+    fn write_str(& mut self, msg: &str) -> fmt::Result {
+        write!(self.serial, "{}", msg).unwrap();
+        Ok(())
     }
 }
 

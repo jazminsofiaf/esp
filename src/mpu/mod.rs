@@ -1,21 +1,31 @@
 mod bits;
 mod device;
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET};
+use nalgebra::{Vector3, Vector2};
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
+
+#[macro_use]
 use crate::logger::Logger;
+use core::fmt::Write;
 use alloc::sync::Arc;
 use esp32_hal::i2c::{self, Error};
-use xtensa_lx::mutex::{SpinLockMutex, Mutex};
+use xtensa_lx::mutex::{SpinLockMutex, Mutex, CriticalSectionSpinLockMutex};
 use esp32_hal::target::{ I2C0, DPORT};
 use esp32_hal::gpio::{OutputPin, InputPin};
 use core::borrow::Borrow;
 use esp32_hal::delay::Delay;
 use esp32_hal::hal::blocking::delay::DelayMs;
+use core::ops::Deref;
 
 
+/// PI, f32
+pub const PI: f32 = core::f32::consts::PI;
+
+/// PI / 180, for conversion to radians
+pub const PI_180: f32 = PI / 180.0;
 
 
 pub struct Mpu {
-    logger: Arc<Logger>,
+    logger: Arc<CriticalSectionSpinLockMutex<Logger>>,
     i2c: SpinLockMutex<i2c::I2C<I2C0>>,
     acc_sensitivity: f32,
     gyro_sensitivity: f32,
@@ -26,7 +36,7 @@ pub struct Mpu {
 impl Mpu{
 
     pub fn new<SDA: InputPin + OutputPin, SCL: InputPin + OutputPin>
-    (logger:  Arc<Logger>, i2c0: I2C0, sda:SDA, scl: SCL, mut dport: DPORT) -> Mpu{
+    (logger:  Arc<CriticalSectionSpinLockMutex<Logger>>, i2c0: I2C0, sda:SDA, scl: SCL, mut dport: DPORT) -> Mpu{
         let i2c = i2c::I2C::new(
             i2c0,
             i2c::Pins { sda, scl },
@@ -44,7 +54,6 @@ impl Mpu{
     pub fn init(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error>{
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
-        self.logger.info("init");
         self.wake(delay)?;
         self.verify()?;
         self.set_accel_range(AccelRange::G2)?;
@@ -67,7 +76,6 @@ impl Mpu{
     fn verify(&mut self) -> Result<(), Error> {
         let address = self.read_byte(WHOAMI)?;
         if address != SLAVE_ADDR {
-            self.logger.info("Mpu device not connected");
             return Err(Error::Transmit);
         }
         Ok(())
@@ -147,20 +155,43 @@ impl Mpu{
 
 
 
-
-    pub fn read(& self) {
-        self.logger.info("info from mpu sensor")
-    }
-
-
-
     /// Sensor Temp in degrees celcius
     pub fn read_temperature(&mut self) -> Result<f32,Error>{
-        self.logger.info("read temperature");
+        self.logger.deref().lock(|logger| {
+            uprintln!(logger, "read temperature");
+        });
         let mut buf: [u8; 2] = [0; 2];
         self.read_bytes(TEMP_OUT_H, &mut buf)?;
         let raw_temp = self.read_word_2c(&buf[0..2]) as f32;
         Ok((raw_temp / TEMP_SENSITIVITY) + TEMP_OFFSET)
+    }
+
+    /// Accelerometer readings in g
+    pub fn read_acceleration(&mut self) -> Result<Vector3<f32>, Error> {
+        let mut acc = self.read_rot(ACC_REGX_H)?;
+        acc /= self.acc_sensitivity;
+
+        Ok(acc)
+    }
+
+    /// Gyro readings in rad/s
+    pub fn read_gyro(&mut self) -> Result<Vector3<f32>, Error> {
+        let mut gyro = self.read_rot(GYRO_REGX_H)?;
+
+        gyro *= PI_180 * self.gyro_sensitivity;
+
+        Ok(gyro)
+    }
+
+    /// Reads rotation (gyro/acc) from specified register
+    fn read_rot(&mut self, reg: u8) -> Result<Vector3<f32>, Error> {
+        let mut buf: [u8; 6] = [0; 6];
+        self.read_bytes(reg, &mut buf)?;
+        Ok(Vector3::<f32>::new(
+            self.read_word_2c(&buf[0..2]) as f32,
+            self.read_word_2c(&buf[2..4]) as f32,
+            self.read_word_2c(&buf[4..6]) as f32
+        ))
     }
 }
 
