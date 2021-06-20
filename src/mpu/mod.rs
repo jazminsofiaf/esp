@@ -1,7 +1,7 @@
 mod bits;
 mod device;
 use nalgebra::{Vector3};
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,CONFIG,BANDWITH,
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,CONFIG,BANDWITH,CLKSEL,
 SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
 use crate::logger::Logger;
 use core::fmt::Write;
@@ -65,6 +65,9 @@ impl Mpu{
 
         self.set_gyro_range(GyroRange::D500)?;
         self.set_accel_range(AccelRange::G2)?;
+
+        // set clock config to PLL with Gyro X reference
+        self.set_clock_config(CLKSEL::GXAXIS)?;
        
         
         //self.set_accel_hpf(ACCEL_HPF::_RESET)?;
@@ -87,7 +90,7 @@ impl Mpu{
     |  --  |  --  |  --  |  --  |  --  | GYRO_RESET | ACC_RESET | TEMP_RESET |
      ------ ------ ------ ------ ------ ------------ ----------- ------------
     ***/
-    pub fn reset_device(&mut self) -> Result<(),Error> {
+    fn reset_device(&mut self) -> Result<(),Error> {
         self.write_bit(PWR_MGMT_1::ADDR, PWR_MGMT_1::DEVICE_RESET, true)?;
         let default_value: u8 = 0x40;
         loop {
@@ -175,6 +178,23 @@ impl Mpu{
 
         self.gyro_sensitivity = range.sensitivity();
         Ok(())
+    }
+
+
+    /***
+    // Set clock source
+    // Wite byte 00000XXX to Register 0x6B to configure clock source
+     _____________ _______ _______ ______ _________ _________ _________ __________
+    | DEVICE_RESET| SLEEP | CYCLE |  --  | TEMP_DIS|         CLKSEL[2:0]          |
+     ------------- ------- ------- ------ --------- --------- --------- ---------- 
+    ***/
+    fn set_clock_config(&mut self, clock_source: CLKSEL) -> Result<(),Error> {
+        Ok(
+            self.write_bits(PWR_MGMT_1::ADDR,
+                PWR_MGMT_1::CLKSEL.bit,
+                PWR_MGMT_1::CLKSEL.length,
+                clock_source as u8)?
+        )
     }
 
     /// set accel high pass filter mode

@@ -16,6 +16,7 @@
 /// x * range/2**(resolution-1) or x / (2**(resolution-1) / range)
 ///
 /// Sources:
+///     * https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf
 ///     * https://www.nxp.com/docs/en/application-note/AN3461.pdf
 ///     * https://theccontinuum.com/2012/09/24/arduino-imu-pitch-roll-from-accelerometer/
 ///     * https://makersportal.com/blog/2019/8/17/arduino-mpu6050-high-frequency-accelerometer-and-gyroscope-data-saver#accel_test
