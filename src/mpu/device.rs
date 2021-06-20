@@ -294,6 +294,25 @@ pub enum LP_WAKE_CTRL {
 
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum BANDWITH {
+    ///< Docs imply this disables the filter
+    _260_HZ = 0, 
+    ///< 184 Hz
+    _184_HZ = 1, 
+    ///< 94 Hz
+    _94_HZ = 2,  
+     ///< 44 Hz
+    _44_HZ = 3, 
+    ///< 21 Hz
+    _21_HZ = 4,  
+    ///< 10 Hz
+    _10_HZ = 5,  
+    ///< 5 Hz
+    _5_HZ = 6,   
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Accelerometer High Pass Filter Values
 pub enum ACCEL_HPF {
     /// Cut off frequency: None

@@ -1,7 +1,7 @@
 mod bits;
 mod device;
 use nalgebra::{Vector3};
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,CONFIG,BANDWITH,
 SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
 use crate::logger::Logger;
 use core::fmt::Write;
@@ -60,9 +60,15 @@ impl Mpu{
         self.wake()?;
         self.verify()?;
         self.set_sample_rate_division(0)?;
+
+        self.set_filter_bandwidth(BANDWITH::_260_HZ)?;
+
+        self.set_gyro_range(GyroRange::D500)?;
         self.set_accel_range(AccelRange::G2)?;
-        self.set_gyro_range(GyroRange::D250)?;
-        self.set_accel_hpf(ACCEL_HPF::_RESET)?;
+       
+        
+        //self.set_accel_hpf(ACCEL_HPF::_RESET)?;
+       
         Ok(())
     }
 
@@ -131,6 +137,20 @@ impl Mpu{
     /// Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
     fn set_sample_rate_division(&mut self, divisor: u8) -> Result<(), Error> {
         self.write_byte( SMPLRT_DIV,divisor)?;
+        Ok(())
+    }
+
+    /***
+    //Wite byte xxxxx000 Register 0x1a to set filter bandwith
+     ______ ______ ______ ______ ______ ______ ______ ______
+    |  --  |  --  |     EXT_SYNC_SET   |      DLPF_CFG      |
+     ------ ------ ------ ------ ------ ------ ------ ------ 
+    ***/
+    fn set_filter_bandwidth(&mut self, bandwith: BANDWITH) -> Result<(), Error> {
+        self.write_bits(CONFIG::ADDR,
+            CONFIG::DLPF_CFG.bit,
+            CONFIG::DLPF_CFG.length,
+            bandwith as u8)?;
         Ok(())
     }
 
