@@ -62,6 +62,8 @@ pub const TEMP_OUT_H : u8= 0x41;
 pub const SLAVE_ADDR: u8 = 0x68;
 /// Internal register to check slave addr
 pub const WHOAMI: u8 = 0x75;
+///Internal register to reset the analog and digital signal paths of the Gyro, Accel, and Temp sensors
+pub const SIGNAL_PATH_RESET: u8 = 0x68; 
 
 /// Describes a bit block from bit number 'bit' to 'bit'+'length'
 pub struct BitBlock {

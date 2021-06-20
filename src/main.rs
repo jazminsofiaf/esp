@@ -20,8 +20,6 @@ use esp32_hal::target;
 use esp32_hal::dport::Split;
 use xtensa_lx::timer::delay;
 use esp32_hal::hal::digital::v2::OutputPin;
-
-#[macro_use]
 extern crate alloc;
 use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
 use esp32_hal::delay::Delay;

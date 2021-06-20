@@ -5,9 +5,6 @@ use esp32_hal::clock_control::ClockControl;
 use esp32_hal::clock_control::CPUSource::PLL;
 use esp32_hal::hal::watchdog::WatchdogEnable;
 use esp32_hal::serial::config::Config;
-use core::fmt::Write;
-use xtensa_lx::mutex::{CriticalSectionSpinLockMutex, Mutex};
-use core::borrow::Borrow;
 use core::fmt;
 
 macro_rules! uprint {

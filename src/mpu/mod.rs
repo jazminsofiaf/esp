@@ -1,9 +1,7 @@
 mod bits;
 mod device;
-use nalgebra::{Vector3, Vector2};
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
-
-#[macro_use]
+use nalgebra::{Vector3};
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
 use crate::logger::Logger;
 use core::fmt::Write;
 use alloc::sync::Arc;
@@ -55,7 +53,7 @@ impl Mpu{
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
 
-        self.reset_device(delay);
+        self.reset_device(delay)?;
 
         self.wake(delay)?;
         self.verify()?;
@@ -66,16 +64,19 @@ impl Mpu{
     }
 
     /***
-    Register 0x6B 
+    //Wite byte 10000000 to Register 0x6B to reset device 
      _____________ _______ _______ ______ _________ _________ _________ __________
     |     bit 7   | bit 6 | bit 5 | bit4 |   bit3  |   bit2  |   bit1  |    bit0  | 
      ------------- ------- ------- ------ --------- --------- --------- ---------- 
      _____________ _______ _______ ______ _________ _________ _________ __________
     |DEVICE_RESET | SLEEP | CYCLE |  --  | TEMP_DIS|         CLKSEL[2:0]          |
      ------------- ------- ------- ------ --------- --------- --------- ---------- 
+    //Note: Reset sets sleep to true! Section register map: resets PWR_MGMT to 0x40 
 
-    //wite byte 10000000 to 0x6B register
-    // Note: Reset sets sleep to true! Section register map: resets PWR_MGMT to 0x40 
+    //Wite byte 00000111 Register 0x68 to reset sensor digital path
+     ______ ______ ______ ______ ______ ____________ ___________ ____________
+    |  --  |  --  |  --  |  --  |  --  | GYRO_RESET | ACC_RESET | TEMP_RESET |
+     ------ ------ ------ ------ ------ ------------ ----------- ------------
     ***/
     pub fn reset_device(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(),Error> {
         self.write_bit(PWR_MGMT_1::ADDR, PWR_MGMT_1::DEVICE_RESET, true)?;
@@ -89,6 +90,9 @@ impl Mpu{
             delay.delay_ms(1u8);
             
         }
+        delay.delay_ms(100u8);
+        let reset_all_sensor_digital_path: u8 = 0x7;
+        self.write_byte(SIGNAL_PATH_RESET, reset_all_sensor_digital_path)?;
         delay.delay_ms(100u8);
         Ok(())
     }
