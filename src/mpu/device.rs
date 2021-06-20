@@ -312,6 +312,21 @@ pub enum BANDWITH {
     _5_HZ = 6,   
 }
 
+impl From<u8> for BANDWITH {
+    fn from(range: u8) -> Self
+    {
+        match range {
+            0 => BANDWITH::_260_HZ,
+            1 => BANDWITH::_184_HZ,
+            2 => BANDWITH::_94_HZ,
+            3 => BANDWITH::_44_HZ,
+            4 => BANDWITH::_21_HZ,
+            6 => BANDWITH::_10_HZ,
+            _ => BANDWITH::_5_HZ
+        }
+    }
+}
+
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 /// Accelerometer High Pass Filter Values

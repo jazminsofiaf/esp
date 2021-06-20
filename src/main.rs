@@ -33,7 +33,6 @@ mod logger;
 use core::fmt::Write;
 mod mpu;
 
-
 /// The default clock source is the onboard crystal
 /// In most cases 40mhz (but can be as low as 2mhz depending on the board)
 const CORE_HZ: u32 = 40_000_000;
@@ -64,17 +63,35 @@ fn main() -> ! {
     let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
     mpu.init().unwrap();
 
+    mpu.set_accel_range(mpu::device::AccelRange::G8).unwrap();
+    let acc_range = mpu.get_accel_range().unwrap();
+    serial_port_logger.deref().lock(|logger| {
+        uprintln!(logger, "Accelerometer range set to:  +-{:?}", acc_range);
+    });
+
+    mpu.set_gyro_range(mpu::device::GyroRange::D500).unwrap();
+    let gyro_range = mpu.get_gyro_range().unwrap();
+    serial_port_logger.deref().lock(|logger| {
+        uprintln!(logger, "Gyro range set to:  +-{:?} deg/s", gyro_range);
+    });
+
+    mpu.set_filter_bandwidth(mpu::device::BANDWITH::_21_HZ).unwrap();
+    let filter_bandwidth = mpu.get_filter_bandwidth().unwrap();
+    serial_port_logger.deref().lock(|logger| {
+        uprintln!(logger, "Filter bandwidth set to: {:?} ", filter_bandwidth);
+    });
+
+
     loop {
-        let temp =mpu.read_temperature().unwrap();
+        let temp =mpu.read_temperature_celcius().unwrap();
         serial_port_logger.deref().lock(|logger| {
             uprintln!(logger, "temperature: {:.3} C", temp);
         });
-
         let acc = mpu.read_acceleration().unwrap();
         serial_port_logger.deref().lock(|logger| {
-          uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", acc.x, acc.y, acc.z);
+          uprintln!(logger, "acc: x={:.3} y={:.3} z={:.3}", acc.x, acc.y, acc.z);
         });
-        let gyro = mpu.read_gyro().unwrap();
+        let gyro = mpu.read_gyro_radians().unwrap();
         serial_port_logger.deref().lock(|logger| {
           uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", gyro.x, gyro.y, gyro.z);
         });

@@ -1,8 +1,7 @@
 mod bits;
-mod device;
+pub mod device;
 use nalgebra::{Vector3};
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,CONFIG,BANDWITH,CLKSEL,
-SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
+use crate::mpu::device::*;
 use crate::logger::Logger;
 use core::fmt::Write;
 use alloc::sync::Arc;
@@ -19,9 +18,10 @@ use core::ops::Deref;
 /// PI, f32
 pub const PI: f32 = core::f32::consts::PI;
 
-/// PI / 180, for conversion to radians
+/// PI / 180, for conversion degrees to radians
 pub const PI_180: f32 = PI / 180.0;
 
+pub const GRAVITY_EARTH: f32 = 9.80665;
 
 pub struct Mpu {
     logger: Arc<CriticalSectionSpinLockMutex<Logger>>,
@@ -68,10 +68,7 @@ impl Mpu{
 
         // set clock config to PLL with Gyro X reference
         self.set_clock_config(CLKSEL::GXAXIS)?;
-       
-        
         //self.set_accel_hpf(ACCEL_HPF::_RESET)?;
-       
         Ok(())
     }
 
@@ -144,12 +141,12 @@ impl Mpu{
     }
 
     /***
-    //Wite byte xxxxx000 Register 0x1a to set filter bandwith
+    //Wite byte 0000xxx Register 0x1a to set filter bandwith
      ______ ______ ______ ______ ______ ______ ______ ______
     |  --  |  --  |     EXT_SYNC_SET   |      DLPF_CFG      |
      ------ ------ ------ ------ ------ ------ ------ ------ 
     ***/
-    fn set_filter_bandwidth(&mut self, bandwith: BANDWITH) -> Result<(), Error> {
+    pub fn set_filter_bandwidth(&mut self, bandwith: BANDWITH) -> Result<(), Error> {
         self.write_bits(CONFIG::ADDR,
             CONFIG::DLPF_CFG.bit,
             CONFIG::DLPF_CFG.length,
@@ -157,8 +154,12 @@ impl Mpu{
         Ok(())
     }
 
-
-    /// set accel range, and update sensitivy accordingly
+    /*** Set accel range, and update sensitivy accordingly
+    //Wite byte 000xx000 Register 0x1c to set filter bandwith
+     _______ _______ _______ ______ ______ ______ ______ ______
+    | XA_ST | YA_ST | ZA_ST |   AFS_SEL   |  --  |  --  |  --  |
+     ------- ------- ------- ------ ------ ------ ------ ------ 
+    ***/
     pub fn set_accel_range(&mut self, range: AccelRange) -> Result<(), Error> {
         self.write_bits(ACCEL_CONFIG::ADDR,
                         ACCEL_CONFIG::FS_SEL.bit,
@@ -169,7 +170,12 @@ impl Mpu{
         Ok(())
     }
 
-    /// Set gyro range, and update sensitivity accordingly
+    /*** Set gyro range, and update sensitivy accordingly
+    //Wite byte 000xx000 Register 0x1b to set filter bandwith
+     _______ _______ _______ ______ ______ ______ ______ ______
+    | XG_ST | YG_ST | ZG_ST |    FS_SEL   |  --  |  --  |  --  |
+     ------- ------- ------- ------ ------ ------ ------ ------ 
+    ***/
     pub fn set_gyro_range(&mut self, range: GyroRange) -> Result<(), Error> {
         self.write_bits(GYRO_CONFIG::ADDR,
                         GYRO_CONFIG::FS_SEL.bit,
@@ -178,6 +184,32 @@ impl Mpu{
 
         self.gyro_sensitivity = range.sensitivity();
         Ok(())
+    }
+
+    pub fn get_filter_bandwidth(&mut self) -> Result<BANDWITH, Error> {
+        let byte = self.read_bits(CONFIG::ADDR,
+            CONFIG::DLPF_CFG.bit,
+            CONFIG::DLPF_CFG.length)?;
+
+        Ok(BANDWITH::from(byte))
+    }
+
+    /// get current gyro range
+    pub fn get_gyro_range(&mut self) -> Result<GyroRange, Error> {
+        let byte = self.read_bits(GYRO_CONFIG::ADDR,
+                                  GYRO_CONFIG::FS_SEL.bit,
+                                  GYRO_CONFIG::FS_SEL.length)?;
+
+        Ok(GyroRange::from(byte))
+    }
+
+    /// get current accel_range
+    pub fn get_accel_range(&mut self) -> Result<AccelRange, Error> {
+        let byte = self.read_bits(ACCEL_CONFIG::ADDR,
+                                  ACCEL_CONFIG::FS_SEL.bit,
+                                  ACCEL_CONFIG::FS_SEL.length)?;
+
+        Ok(AccelRange::from(byte))
     }
 
 
@@ -189,12 +221,13 @@ impl Mpu{
      ------------- ------- ------- ------ --------- --------- --------- ---------- 
     ***/
     fn set_clock_config(&mut self, clock_source: CLKSEL) -> Result<(),Error> {
-        Ok(
-            self.write_bits(PWR_MGMT_1::ADDR,
-                PWR_MGMT_1::CLKSEL.bit,
-                PWR_MGMT_1::CLKSEL.length,
-                clock_source as u8)?
-        )
+        self.write_bits(PWR_MGMT_1::ADDR,
+            PWR_MGMT_1::CLKSEL.bit,
+            PWR_MGMT_1::CLKSEL.length,
+            clock_source as u8)?;
+        self.delay.delay_ms(100u8);
+        Ok(())
+        
     }
 
     /// set accel high pass filter mode
@@ -208,7 +241,7 @@ impl Mpu{
     }
 
     /// Enables bit n at register address reg
-    pub fn write_bit(&mut self, reg: u8, bit_n: u8, enable: bool) -> Result<(), Error> {
+    fn write_bit(&mut self, reg: u8, bit_n: u8, enable: bool) -> Result<(), Error> {
         let mut byte: [u8; 1] = [0; 1];
         self.read_bytes(reg, &mut byte)?;
         bits::set_bit(&mut byte[0], bit_n, enable);
@@ -255,10 +288,17 @@ impl Mpu{
         return word;
     }
 
+    /// Read bits at register reg, starting with bit start_bit, until start_bit+length
+    fn read_bits(&mut self, reg: u8, start_bit: u8, length: u8) -> Result<u8, Error> {
+        let mut byte: [u8; 1] = [0; 1];
+        self.read_bytes(reg, &mut byte)?;
+        Ok(bits::get_bits(byte[0], start_bit, length))
+    }
+
 
 
     /// Sensor Temp in degrees celcius
-    pub fn read_temperature(&mut self) -> Result<f32,Error>{
+    pub fn read_temperature_celcius(&mut self) -> Result<f32,Error>{
         self.logger.deref().lock(|logger| {
             uprintln!(logger, "read temperature");
         });
@@ -269,19 +309,31 @@ impl Mpu{
     }
 
     /// Accelerometer readings in g
-    pub fn read_acceleration(&mut self) -> Result<Vector3<f32>, Error> {
+    pub fn read_acceleration_gravity(&mut self) -> Result<Vector3<f32>, Error> {
         let mut acc = self.read_rot(ACC_REGX_H)?;
         acc /= self.acc_sensitivity;
 
         Ok(acc)
     }
 
-    /// Gyro readings in rad/s
-    pub fn read_gyro(&mut self) -> Result<Vector3<f32>, Error> {
+    /// Accelerometer m/s^2
+    pub fn read_acceleration(&mut self) -> Result<Vector3<f32>, Error> {
+        let mut acc = self.read_acceleration_gravity()?;
+        acc *= GRAVITY_EARTH;
+        Ok(acc)
+    }
+
+    /// Gyro readings in radians/s
+    pub fn read_gyro_degrees(&mut self) -> Result<Vector3<f32>, Error> {
         let mut gyro = self.read_rot(GYRO_REGX_H)?;
+        gyro /= self.gyro_sensitivity;
+        Ok(gyro)
+    }
 
-        gyro *= PI_180 * self.gyro_sensitivity;
-
+     /// Gyro readings in degrees/s
+     pub fn read_gyro_radians(&mut self) -> Result<Vector3<f32>, Error> {
+        let mut gyro = self.read_gyro_degrees()?;
+        gyro *= PI_180;
         Ok(gyro)
     }
 
