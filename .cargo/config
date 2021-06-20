@@ -15,13 +15,8 @@ rustflags = [
     "-C", "link-arg=-nostartfiles",
 ]
 
-
-
 [build]
 target = "xtensa-esp32-none-elf" # esp32 #to navigate in the ide comment this target
 rustc = "rustc"
 #rustc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustc"
 #rustdoc = "/Users/jazminferreiro/esp-rs/rust-xtensa/build/x86_64-apple-darwin/stage2/bin/rustdoc"
-
-[test]
-target = "xtensa-esp32-none-elf"

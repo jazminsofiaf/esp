@@ -38,7 +38,6 @@ impl Logger {
                gpio3: Gpio3<esp32_hal::gpio::Unknown>,
     ) -> Logger {
 
-
         // setup clocks & watchdog
         let mut clock_control = ClockControl::new(
             real_time_control, //RTCCNTL
@@ -80,19 +79,6 @@ impl Logger {
             serial: uart0
         }
     }
-
-
-    pub fn info(&mut self, msg: &'static str) {
-        uprintln!(self, "The answer is {}", 40 + 2);
-    }
-
-/*
-    pub fn info(&self, msg: &'static str) {
-        self.serial.borrow().lock(|logger| {
-            writeln!(logger, "{}", msg).unwrap();
-        });
-    }
- */
 
 }
 

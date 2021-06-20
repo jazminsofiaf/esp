@@ -54,20 +54,50 @@ impl Mpu{
     pub fn init(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error>{
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
+
+        self.reset_device(delay);
+
         self.wake(delay)?;
         self.verify()?;
         self.set_accel_range(AccelRange::G2)?;
         self.set_gyro_range(GyroRange::D250)?;
         self.set_accel_hpf(ACCEL_HPF::_RESET)?;
         Ok(())
+    }
 
+    /***
+    Register 0x6B 
+     _____________ _______ _______ ______ _________ _________ _________ __________
+    |     bit 7   | bit 6 | bit 5 | bit4 |   bit3  |   bit2  |   bit1  |    bit0  | 
+     ------------- ------- ------- ------ --------- --------- --------- ---------- 
+     _____________ _______ _______ ______ _________ _________ _________ __________
+    |DEVICE_RESET | SLEEP | CYCLE |  --  | TEMP_DIS|         CLKSEL[2:0]          |
+     ------------- ------- ------- ------ --------- --------- --------- ---------- 
+
+    //wite byte 10000000 to 0x6B register
+    // Note: Reset sets sleep to true! Section register map: resets PWR_MGMT to 0x40 
+    ***/
+    pub fn reset_device(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(),Error> {
+        self.write_bit(PWR_MGMT_1::ADDR, PWR_MGMT_1::DEVICE_RESET, true)?;
+        let default_value: u8 = 0x40;
+        loop {
+            let result = self.read_byte(PWR_MGMT_1::ADDR)?;
+            self.logger.deref().lock(|logger| { uprint!(logger, " reset device result")}); self.print_bits(result);
+            if result == default_value {
+                break;
+            }
+            delay.delay_ms(1u8);
+            
+        }
+        delay.delay_ms(100u8);
+        Ok(())
     }
 
     /// Wakes MPU6050 with all sensors enabled (default)
     fn wake(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error> {
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
-        self.write_byte(PWR_MGMT_1::ADDR, 0x01)?; //0x6B=0x00
+        self.write_byte(PWR_MGMT_1::ADDR, 0x00)?; //0x6B=0x00
         delay.delay_ms(100u8);
         Ok(())
     }
@@ -75,11 +105,22 @@ impl Mpu{
     /// Verifies device to address 0x68 with WHOAMI.addr() Register
     fn verify(&mut self) -> Result<(), Error> {
         let address = self.read_byte(WHOAMI)?;
+        self.logger.deref().lock(|logger| { uprint!(logger, " mpu address")}); self.print_bits(address);
         if address != SLAVE_ADDR {
             return Err(Error::Transmit);
         }
         Ok(())
     }
+
+    fn print_bits(&mut self, byte_var: u8){
+        self.logger.deref().lock(|logger| {
+            uprintln!(logger, " in binary = {}{}{}{}{}{}{}{}", bits::get_bit(byte_var,7),bits::get_bit(byte_var,6), bits::get_bit(byte_var,5),
+            bits::get_bit(byte_var,4) , bits::get_bit(byte_var,3), bits::get_bit(byte_var,2), bits::get_bit(byte_var,1), bits::get_bit(byte_var,0));
+        });
+
+    }
+
+
 
     /// set accel range, and update sensitivy accordingly
     pub fn set_accel_range(&mut self, range: AccelRange) -> Result<(), Error> {
@@ -111,6 +152,14 @@ impl Mpu{
                             ACCEL_CONFIG::ACCEL_HPF.length,
                             mode as u8)?
         )
+    }
+
+    /// Enables bit n at register address reg
+    pub fn write_bit(&mut self, reg: u8, bit_n: u8, enable: bool) -> Result<(), Error> {
+        let mut byte: [u8; 1] = [0; 1];
+        self.read_bytes(reg, &mut byte)?;
+        bits::set_bit(&mut byte[0], bit_n, enable);
+        Ok(self.write_byte(reg, byte[0])?)
     }
 
     /// Write bits data at reg from start_bit to start_bit+length

@@ -64,29 +64,24 @@ fn main() -> ! {
 
     let logger = logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3);
     let serial_port_logger = alloc::sync::Arc::new(CriticalSectionSpinLockMutex::new(logger));
-
     let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
     let mut delay_i2c = Delay::new();
     mpu.init(&mut delay_i2c).unwrap();
-
-
 
     loop {
         let temp =mpu.read_temperature().unwrap();
         serial_port_logger.deref().lock(|logger| {
             uprintln!(logger, "temperature: {:.3} C", temp);
         });
-        /*
-          let acc = mpu.read_acceleration().unwrap();
-          serial_port_logger.deref().lock(|logger| {
-            uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", acc.x, acc.y, acc.z);
-          });
-          let gyro = mpu.read_gyro().unwrap();
-          serial_port_logger.deref().lock(|logger| {
-            uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", gyro.x, gyro.y, gyro.z);
-          });
 
-          */
+        let acc = mpu.read_acceleration().unwrap();
+        serial_port_logger.deref().lock(|logger| {
+          uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", acc.x, acc.y, acc.z);
+        });
+        let gyro = mpu.read_gyro().unwrap();
+        serial_port_logger.deref().lock(|logger| {
+          uprintln!(logger, "gyro: x={:.3} y={:.3} z={:.3}", gyro.x, gyro.y, gyro.z);
+        });
         led.set_high().unwrap();
         delay(CORE_HZ); // timer
     }

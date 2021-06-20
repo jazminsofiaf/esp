@@ -6,5 +6,7 @@ Cargo.lock
 core
 svd/
 .idea
+.idea/
 .idea/*
 .idea/**
+
