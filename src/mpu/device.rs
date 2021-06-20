@@ -64,6 +64,8 @@ pub const SLAVE_ADDR: u8 = 0x68;
 pub const WHOAMI: u8 = 0x75;
 ///Internal register to reset the analog and digital signal paths of the Gyro, Accel, and Temp sensors
 pub const SIGNAL_PATH_RESET: u8 = 0x68; 
+///Internal register to set sample rate divisor
+pub const SMPLRT_DIV: u8 = 0x19; 
 
 /// Describes a bit block from bit number 'bit' to 'bit'+'length'
 pub struct BitBlock {

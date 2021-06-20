@@ -22,7 +22,6 @@ use xtensa_lx::timer::delay;
 use esp32_hal::hal::digital::v2::OutputPin;
 extern crate alloc;
 use esp32_hal::alloc::{Allocator, DEFAULT_ALLOCATOR};
-use esp32_hal::delay::Delay;
 use core::ops::Deref;
 
 
@@ -63,8 +62,7 @@ fn main() -> ! {
     let logger = logger::Logger::new(dport_clock_control, peripherals.RTCCNTL, peripherals.APB_CTRL, peripherals.UART0, pins.gpio1, pins.gpio3);
     let serial_port_logger = alloc::sync::Arc::new(CriticalSectionSpinLockMutex::new(logger));
     let mut mpu = mpu::Mpu::new(serial_port_logger.clone(), peripherals.I2C0, pins.gpio21, pins.gpio22, dport);
-    let mut delay_i2c = Delay::new();
-    mpu.init(&mut delay_i2c).unwrap();
+    mpu.init().unwrap();
 
     loop {
         let temp =mpu.read_temperature().unwrap();

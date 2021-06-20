@@ -1,7 +1,8 @@
 mod bits;
 mod device;
 use nalgebra::{Vector3};
-use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1, SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
+use crate::mpu::device::{ACCEL_SENS, GYRO_SENS, AccelRange, GyroRange, ACCEL_HPF, PWR_MGMT_1,SMPLRT_DIV,
+SLAVE_ADDR, WHOAMI,SIGNAL_PATH_RESET, ACCEL_CONFIG, GYRO_CONFIG, TEMP_OUT_H, TEMP_SENSITIVITY, TEMP_OFFSET, ACC_REGX_H, GYRO_REGX_H};
 use crate::logger::Logger;
 use core::fmt::Write;
 use alloc::sync::Arc;
@@ -25,6 +26,7 @@ pub const PI_180: f32 = PI / 180.0;
 pub struct Mpu {
     logger: Arc<CriticalSectionSpinLockMutex<Logger>>,
     i2c: SpinLockMutex<i2c::I2C<I2C0>>,
+    delay: esp32_hal::delay::Delay,
     acc_sensitivity: f32,
     gyro_sensitivity: f32,
 }
@@ -44,19 +46,20 @@ impl Mpu{
         Mpu {
             logger,
             i2c: SpinLockMutex::new(i2c),
+            delay: Delay::new(),
             acc_sensitivity: ACCEL_SENS.0,
             gyro_sensitivity: GYRO_SENS.0,
         }
     }
 
-    pub fn init(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error>{
+    pub fn init(&mut self) -> Result<(), Error>{
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
 
-        self.reset_device(delay)?;
-
-        self.wake(delay)?;
+        self.reset_device()?;
+        self.wake()?;
         self.verify()?;
+        self.set_sample_rate_division(0)?;
         self.set_accel_range(AccelRange::G2)?;
         self.set_gyro_range(GyroRange::D250)?;
         self.set_accel_hpf(ACCEL_HPF::_RESET)?;
@@ -78,7 +81,7 @@ impl Mpu{
     |  --  |  --  |  --  |  --  |  --  | GYRO_RESET | ACC_RESET | TEMP_RESET |
      ------ ------ ------ ------ ------ ------------ ----------- ------------
     ***/
-    pub fn reset_device(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(),Error> {
+    pub fn reset_device(&mut self) -> Result<(),Error> {
         self.write_bit(PWR_MGMT_1::ADDR, PWR_MGMT_1::DEVICE_RESET, true)?;
         let default_value: u8 = 0x40;
         loop {
@@ -87,22 +90,22 @@ impl Mpu{
             if result == default_value {
                 break;
             }
-            delay.delay_ms(1u8);
+            self.delay.delay_ms(1u8);
             
         }
-        delay.delay_ms(100u8);
+        self.delay.delay_ms(100u8);
         let reset_all_sensor_digital_path: u8 = 0x7;
         self.write_byte(SIGNAL_PATH_RESET, reset_all_sensor_digital_path)?;
-        delay.delay_ms(100u8);
+        self.delay.delay_ms(100u8);
         Ok(())
     }
 
     /// Wakes MPU6050 with all sensors enabled (default)
-    fn wake(&mut self, delay: &mut esp32_hal::delay::Delay) -> Result<(), Error> {
+    fn wake(&mut self) -> Result<(), Error> {
         // MPU6050 has sleep enabled by default -> set bit 0 to wake
         // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001 (See Register Map )
         self.write_byte(PWR_MGMT_1::ADDR, 0x00)?; //0x6B=0x00
-        delay.delay_ms(100u8);
+        self.delay.delay_ms(100u8);
         Ok(())
     }
 
@@ -124,6 +127,12 @@ impl Mpu{
 
     }
 
+    /// Sets the divisor used to divide the base clock rate into a measurement rate
+    /// Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
+    fn set_sample_rate_division(&mut self, divisor: u8) -> Result<(), Error> {
+        self.write_byte( SMPLRT_DIV,divisor)?;
+        Ok(())
+    }
 
 
     /// set accel range, and update sensitivy accordingly
